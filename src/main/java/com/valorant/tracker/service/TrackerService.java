@@ -29,7 +29,7 @@ public class TrackerService {
     public TrackerService(){
         System.setProperty("webdriver.chrome.driver", "src/main/resources/driver/chromedriver");
 
-        options.addArguments("--headless"); // Run in headless mode
+//        options.addArguments("--headless"); // Run in headless mode
         options.addArguments("--user-agent=" + USER_AGENT);
     }
 
