@@ -29,7 +29,7 @@ public class TrackerService {
     public TrackerService(){
         System.setProperty("webdriver.chrome.driver", "src/main/resources/driver/chromedriver");
 
-//        options.addArguments("--headless"); // Run in headless mode
+        options.addArguments("--headless"); // Run in headless mode
         options.addArguments("--user-agent=" + USER_AGENT);
     }
 
@@ -99,13 +99,14 @@ public class TrackerService {
                         );
             } catch (Exception e) {
                 try {
-                    // Your existing code
                     wait.until(ExpectedConditions.presenceOfElementLocated(TrackerGGObject.BLOCKED));
                     driver.quit();
                     return "You've been blocked. Please wait 24hrs";
                 } catch (Exception e2) {
-                    bottomFrags = -1;
-                    break;
+                    String exit = driver.getTitle();
+                    driver.quit();
+
+                    return exit;
                 }
             }
 
