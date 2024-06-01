@@ -98,8 +98,15 @@ public class TrackerService {
                                 wait.until(ExpectedConditions.presenceOfElementLocated(TrackerGGObject.JSON_RESPONSE)).getText()
                         );
             } catch (Exception e) {
-                bottomFrags = -1;
-                break;
+                try {
+                    // Your existing code
+                    wait.until(ExpectedConditions.presenceOfElementLocated(TrackerGGObject.BLOCKED));
+                    driver.quit();
+                    return "You've been blocked. Please wait 24hrs";
+                } catch (Exception e2) {
+                    bottomFrags = -1;
+                    break;
+                }
             }
 
             JSONArray matches = jsonObject.getJSONObject("data").getJSONArray("matches");
