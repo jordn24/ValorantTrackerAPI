@@ -27,9 +27,9 @@ public class TrackerService {
     private ChromeOptions options = new ChromeOptions();
 
     public TrackerService(){
-        System.setProperty("webdriver.chrome.driver", "src/main/resources/driver/chromedriver");
+        System.setProperty("webdriver.chrome.driver", "src/main/resources/driver/chromedriver.exe");
 
-        options.addArguments("--headless"); // Run in headless mode
+//        options.addArguments("--headless"); // Run in headless mode
         options.addArguments("--user-agent=" + USER_AGENT);
     }
 
@@ -71,20 +71,24 @@ public class TrackerService {
         return Integer.parseInt(data);
     }
 
-    public String scrapeBottomFrags(String user, String tag){
-        int page = 0;
+    public String scrapeBottomFrags(String user, String tag, Integer limitParam, Integer startLimit, Integer sleep){
+        int page = startLimit;
         int bottomFrags = 0;
+        int limit = limitParam;
+
         WebDriver driver = new ChromeDriver(options);
-
-
         while (true) {
+
+            if(user.contains(" ")){
+                user = user.replace(" ", "%20");
+            }
 
             String url = "https://api.tracker.gg/api/v2/valorant/standard/matches/riot/" + user + "%23" + tag + "?type=competitive&season=&agent=all&map=all&next=" + page;
 
             driver.get(url);
 
             try {
-                Thread.sleep(15000);
+                Thread.sleep(sleep);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -101,7 +105,7 @@ public class TrackerService {
                 try {
                     wait.until(ExpectedConditions.presenceOfElementLocated(TrackerGGObject.BLOCKED));
                     driver.quit();
-                    return "You've been blocked. Please wait 24hrs";
+                    return "You've been blocked. Please wait 24hrs. Count was " + bottomFrags + " on page " + page;
                 } catch (Exception e2) {
                     String exit = driver.getTitle();
                     driver.quit();
@@ -133,6 +137,9 @@ public class TrackerService {
                 }
             }
             page++;
+            if (page > limit){
+                break;
+            }
         }
 
         driver.quit();
