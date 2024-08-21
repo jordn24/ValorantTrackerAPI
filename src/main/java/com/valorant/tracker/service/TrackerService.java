@@ -27,8 +27,9 @@ public class TrackerService {
     private ChromeOptions options = new ChromeOptions();
 
     public TrackerService(){
-        System.setProperty("webdriver.chrome.driver", "src/main/resources/driver/chromedriver.exe");
-
+        // System.setProperty("webdriver.chrome.driver", "src/main/resources/driver/chromedriver.exe");
+        System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
+    
 //        options.addArguments("--headless"); // Run in headless mode
         options.addArguments("--user-agent=" + USER_AGENT);
     }
