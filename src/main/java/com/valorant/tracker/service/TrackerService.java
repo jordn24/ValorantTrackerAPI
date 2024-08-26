@@ -47,13 +47,13 @@ public class TrackerService {
 
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30)); // Wait for up to 10 seconds
             wait.until(ExpectedConditions.presenceOfElementLocated(TrackerGGObject.MATCHES));
-    
+
             data = driver.findElement(TrackerGGObject.MATCHES).getText();
             data = data.replace(" Matches", "");
             data = data.replace(",","");
-    
+
             driver.quit();
-            
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -74,11 +74,11 @@ public class TrackerService {
 
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15)); // Wait for up to 10 seconds
             wait.until(ExpectedConditions.presenceOfElementLocated(TrackerGGObject.MATCHES));
-    
+
             data = driver.findElement(TrackerGGObject.MATCHES).getText();
             data = data.replace(" Matches", "");
             data = data.replace(",","");
-    
+
             driver.quit();
         } catch( Exception e) {
             e.printStackTrace();
@@ -87,30 +87,32 @@ public class TrackerService {
         return Integer.parseInt(data);
     }
 
-    public String scrapeBottomFrags(String user, String tag){
-        int page = 0;
+    public String scrapeBottomFrags(String user, String tag, Integer limitParam, Integer startLimit, Integer sleep){
+        int page = startLimit;
         int bottomFrags = 0;
+        int limit = limitParam;
+
         WebDriver driver = new ChromeDriver(options);
 
         try {
             URL seleniumServerUrl = new URL("http://localhost:4444/wd/hub");
             driver = new RemoteWebDriver(seleniumServerUrl, options);
-    
-    
+
+
             while (true) {
-    
+
                 String url = "https://api.tracker.gg/api/v2/valorant/standard/matches/riot/" + user + "%23" + tag + "?type=competitive&season=&agent=all&map=all&next=" + page;
-    
+
                 driver.get(url);
-    
+
                 try {
                     Thread.sleep(15000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-    
+
                 WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-    
+
                 JSONObject jsonObject;
                 try {
                     jsonObject =
@@ -125,41 +127,41 @@ public class TrackerService {
                     } catch (Exception e2) {
                         String exit = driver.getTitle();
                         driver.quit();
-    
+
                         return exit;
                     }
                 }
-    
+
                 JSONArray matches = jsonObject.getJSONObject("data").getJSONArray("matches");
-    
+
                 if (matches.length() == 0) {
                     // No more matches, break out of the loop
                     break;
                 }
-    
+
                 for (int i = 0; i < matches.length(); i++) {
                     JSONObject match = matches.getJSONObject(i);
                     JSONArray segments = match.getJSONArray("segments");
-    
+
                     for (int j = 0; j < segments.length(); j++) {
                         JSONObject segment = segments.getJSONObject(j);
                         JSONObject stats = segment.getJSONObject("stats");
                         JSONObject placement = stats.getJSONObject("placement");
-    
+
                         if (placement.getInt("value") == 10) {
                             bottomFrags += 1;
                         }
-    
+
                     }
                 }
                 page++;
             }
-    
+
             driver.quit();
         } catch ( Exception e ){
             e.printStackTrace();
         }
-        
+
         return Integer.toString(bottomFrags);
     }
 

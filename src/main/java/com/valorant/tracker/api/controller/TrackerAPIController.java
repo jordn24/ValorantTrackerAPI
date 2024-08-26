@@ -30,8 +30,8 @@ public class TrackerAPIController {
 
 //  Career Bottom Frags
     @GetMapping("/total/bottomfrags")
-    public String getTotalBottomFrags(@RequestParam String user, @RequestParam String tag) {
-        return trackerService.scrapeBottomFrags(user, tag).toString();
+    public String getTotalBottomFrags(@RequestParam String user, @RequestParam String tag, @RequestParam(required = false, defaultValue = "200") Integer limit, @RequestParam(required = false, defaultValue = "0") Integer startLimit,  @RequestParam(required = false, defaultValue = "15000") Integer sleep) {
+        return trackerService.scrapeBottomFrags(user, tag, limit, startLimit, sleep).toString();
     }
 
 }
