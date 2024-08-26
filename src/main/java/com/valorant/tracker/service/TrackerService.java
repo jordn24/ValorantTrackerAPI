@@ -4,11 +4,13 @@ import org.json.JSONArray;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
 import org.json.JSONObject;
 
+import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +29,6 @@ public class TrackerService {
     private ChromeOptions options = new ChromeOptions();
 
     public TrackerService(){
-        System.setProperty("webdriver.chrome.driver", "src/main/resources/driver/chromedriver");
-
         options.addArguments("--headless"); // Run in headless mode
         options.addArguments("--user-agent=" + USER_AGENT);
     }
@@ -37,18 +37,27 @@ public class TrackerService {
         String url = base_url + user + "%23" + tag + totalMatchesURI;
         String data = "";
 
-        WebDriver driver = new ChromeDriver(options);
+        WebDriver driver = null;
 
-        driver.get(url);
+        try {
+            URL seleniumServerUrl = new URL("http://localhost:4444/wd/hub");
+            driver = new RemoteWebDriver(seleniumServerUrl, options);
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30)); // Wait for up to 10 seconds
-        wait.until(ExpectedConditions.presenceOfElementLocated(TrackerGGObject.MATCHES));
+            driver.get(url);
 
-        data = driver.findElement(TrackerGGObject.MATCHES).getText();
-        data = data.replace(" Matches", "");
-        data = data.replace(",","");
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30)); // Wait for up to 10 seconds
+            wait.until(ExpectedConditions.presenceOfElementLocated(TrackerGGObject.MATCHES));
+    
+            data = driver.findElement(TrackerGGObject.MATCHES).getText();
+            data = data.replace(" Matches", "");
+            data = data.replace(",","");
+    
+            driver.quit();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        driver.quit();
         return Integer.parseInt(data);
     }
 
@@ -58,16 +67,23 @@ public class TrackerService {
 
         WebDriver driver = new ChromeDriver(options);
 
-        driver.get(url);
+        try {
+            URL seleniumServerUrl = new URL("http://localhost:4444/wd/hub");
+            driver = new RemoteWebDriver(seleniumServerUrl, options);
+            driver.get(url);
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15)); // Wait for up to 10 seconds
-        wait.until(ExpectedConditions.presenceOfElementLocated(TrackerGGObject.MATCHES));
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15)); // Wait for up to 10 seconds
+            wait.until(ExpectedConditions.presenceOfElementLocated(TrackerGGObject.MATCHES));
+    
+            data = driver.findElement(TrackerGGObject.MATCHES).getText();
+            data = data.replace(" Matches", "");
+            data = data.replace(",","");
+    
+            driver.quit();
+        } catch( Exception e) {
+            e.printStackTrace();
+        }
 
-        data = driver.findElement(TrackerGGObject.MATCHES).getText();
-        data = data.replace(" Matches", "");
-        data = data.replace(",","");
-
-        driver.quit();
         return Integer.parseInt(data);
     }
 
@@ -76,66 +92,74 @@ public class TrackerService {
         int bottomFrags = 0;
         WebDriver driver = new ChromeDriver(options);
 
-
-        while (true) {
-
-            String url = "https://api.tracker.gg/api/v2/valorant/standard/matches/riot/" + user + "%23" + tag + "?type=competitive&season=&agent=all&map=all&next=" + page;
-
-            driver.get(url);
-
-            try {
-                Thread.sleep(15000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-
-            JSONObject jsonObject;
-            try {
-                jsonObject =
-                        new JSONObject(
-                                wait.until(ExpectedConditions.presenceOfElementLocated(TrackerGGObject.JSON_RESPONSE)).getText()
-                        );
-            } catch (Exception e) {
+        try {
+            URL seleniumServerUrl = new URL("http://localhost:4444/wd/hub");
+            driver = new RemoteWebDriver(seleniumServerUrl, options);
+    
+    
+            while (true) {
+    
+                String url = "https://api.tracker.gg/api/v2/valorant/standard/matches/riot/" + user + "%23" + tag + "?type=competitive&season=&agent=all&map=all&next=" + page;
+    
+                driver.get(url);
+    
                 try {
-                    wait.until(ExpectedConditions.presenceOfElementLocated(TrackerGGObject.BLOCKED));
-                    driver.quit();
-                    return "You've been blocked. Please wait 24hrs";
-                } catch (Exception e2) {
-                    String exit = driver.getTitle();
-                    driver.quit();
-
-                    return exit;
+                    Thread.sleep(15000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            }
-
-            JSONArray matches = jsonObject.getJSONObject("data").getJSONArray("matches");
-
-            if (matches.length() == 0) {
-                // No more matches, break out of the loop
-                break;
-            }
-
-            for (int i = 0; i < matches.length(); i++) {
-                JSONObject match = matches.getJSONObject(i);
-                JSONArray segments = match.getJSONArray("segments");
-
-                for (int j = 0; j < segments.length(); j++) {
-                    JSONObject segment = segments.getJSONObject(j);
-                    JSONObject stats = segment.getJSONObject("stats");
-                    JSONObject placement = stats.getJSONObject("placement");
-
-                    if (placement.getInt("value") == 10) {
-                        bottomFrags += 1;
+    
+                WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+    
+                JSONObject jsonObject;
+                try {
+                    jsonObject =
+                            new JSONObject(
+                                    wait.until(ExpectedConditions.presenceOfElementLocated(TrackerGGObject.JSON_RESPONSE)).getText()
+                            );
+                } catch (Exception e) {
+                    try {
+                        wait.until(ExpectedConditions.presenceOfElementLocated(TrackerGGObject.BLOCKED));
+                        driver.quit();
+                        return "You've been blocked. Please wait 24hrs";
+                    } catch (Exception e2) {
+                        String exit = driver.getTitle();
+                        driver.quit();
+    
+                        return exit;
                     }
-
                 }
+    
+                JSONArray matches = jsonObject.getJSONObject("data").getJSONArray("matches");
+    
+                if (matches.length() == 0) {
+                    // No more matches, break out of the loop
+                    break;
+                }
+    
+                for (int i = 0; i < matches.length(); i++) {
+                    JSONObject match = matches.getJSONObject(i);
+                    JSONArray segments = match.getJSONArray("segments");
+    
+                    for (int j = 0; j < segments.length(); j++) {
+                        JSONObject segment = segments.getJSONObject(j);
+                        JSONObject stats = segment.getJSONObject("stats");
+                        JSONObject placement = stats.getJSONObject("placement");
+    
+                        if (placement.getInt("value") == 10) {
+                            bottomFrags += 1;
+                        }
+    
+                    }
+                }
+                page++;
             }
-            page++;
+    
+            driver.quit();
+        } catch ( Exception e ){
+            e.printStackTrace();
         }
-
-        driver.quit();
+        
         return Integer.toString(bottomFrags);
     }
 
