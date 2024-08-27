@@ -52,12 +52,11 @@ public class TrackerService {
             data = data.replace(" Matches", "");
             data = data.replace(",","");
 
-            driver.quit();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        driver.quit();
         return Integer.parseInt(data);
     }
 
@@ -78,11 +77,10 @@ public class TrackerService {
             data = data.replace(" Matches", "");
             data = data.replace(",","");
 
-            driver.quit();
         } catch( Exception e) {
             e.printStackTrace();
         }
-
+        driver.quit();
         return Integer.parseInt(data);
     }
 
@@ -156,11 +154,10 @@ public class TrackerService {
                 page++;
             }
 
-            driver.quit();
         } catch ( Exception e ){
             e.printStackTrace();
         }
-
+        driver.quit();
         return Integer.toString(bottomFrags);
     }
 
