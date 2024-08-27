@@ -40,7 +40,7 @@ public class TrackerService {
         WebDriver driver = null;
 
         try {
-            URL seleniumServerUrl = new URL("http://localhost:4444/wd/hub");
+            URL seleniumServerUrl = new URL("http://selenium:4444/wd/hub");
             driver = new RemoteWebDriver(seleniumServerUrl, options);
 
             driver.get(url);
@@ -64,11 +64,10 @@ public class TrackerService {
     public Integer scrapeActMatches(String user, String tag) {
         String url = base_url + user + "%23" + tag + overviewURI;
         String data = "";
-
-        WebDriver driver = new ChromeDriver(options);
+        WebDriver driver = null;
 
         try {
-            URL seleniumServerUrl = new URL("http://localhost:4444/wd/hub");
+            URL seleniumServerUrl = new URL("http://selenium:4444/wd/hub");
             driver = new RemoteWebDriver(seleniumServerUrl, options);
             driver.get(url);
 
@@ -92,10 +91,10 @@ public class TrackerService {
         int bottomFrags = 0;
         int limit = limitParam;
 
-        WebDriver driver = new ChromeDriver(options);
+        WebDriver driver = null;
 
         try {
-            URL seleniumServerUrl = new URL("http://localhost:4444/wd/hub");
+            URL seleniumServerUrl = new URL("http://selenium:4444/wd/hub");
             driver = new RemoteWebDriver(seleniumServerUrl, options);
 
 
